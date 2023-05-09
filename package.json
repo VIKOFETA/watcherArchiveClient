@@ -10,6 +10,12 @@
   },
   "devDependencies": {
     "@types/node": "^18",
-    "nuxt": "^3.4.3"
+    "nuxt": "^3.4.3",
+    "stylus": "^0.59.0"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.4.10",
+    "pinia": "^2.0.35",
+    "stylus-loader": "^7.1.0"
   }
 }
