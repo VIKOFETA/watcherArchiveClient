@@ -1,0 +1,94 @@
+.wrapper-x
+  width 100% !important
+  max-width 100% !important
+  padding-left (100% / 8)
+  padding-right (100% / 8)
+
+  @media only screen and (max-width: 992px)
+    padding-left 30px
+    padding-right 30px
+
+.wrapper
+  width 100% !important
+  max-width 100% !important
+  padding-left (100% / 8)
+  padding-right (100% / 8)
+
+  @media only screen and (max-width: 992px)
+    padding-left 30px
+    padding-right 30px
+
+  &
+  &-y
+  &-top
+    padding-top 170px
+
+    @media only screen and (max-width: 992px)
+      padding-top 40px
+
+  // ------------------------------
+
+  &
+  &-y
+  &-bottom
+    padding-bottom 170px
+
+    @media only screen and (max-width: 992px)
+      padding-bottom 40px
+
+  // ------------------------------
+
+  &-double
+  &-double-y
+  &-double-top
+    padding-top 170px * 2
+
+    @media only screen and (max-width: 992px)
+      padding-top 40px * 2
+
+  // ------------------------------
+
+  &-double
+  &-double-y
+  &-double-bottom
+    padding-bottom 170px * 2
+
+    @media only screen and (max-width: 992px)
+      padding-bottom 40px * 2
+
+.ui
+  &-top
+    padding-top 70px * 2 + 20px
+
+    @media only screen and (max-width: 992px)
+      padding-top 40px * 2 + 40px
+
+  &-max-top
+    padding-top 170px
+
+    @media only screen and (max-width: 992px)
+      padding-top 40px * 2 + 40px
+
+.container
+  width 100% !important
+  max-width 100% !important
+  padding-left (100% / 8)
+  padding-right (100% / 8)
+
+  @media only screen and (max-width: 992px)
+    padding-left 30px
+    padding-right 30px
+
+for num in (7..15)
+  $value = num * 100
+
+  .mw-{$value}
+    max-width $value
+
+.initial-screen
+  min-height 85vh
+  display flex
+  align-items center
+
+  @media only screen and (max-width: 992px)
+    min-height 60vh
