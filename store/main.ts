@@ -12,7 +12,9 @@ export const mainStore = defineStore({
       categories: null as Category[] | null,
       currentCategory: null as Category | null,
       isLoggedIn: false as Boolean,
-      isModalOpened: false as Boolean
+      isModalOpened: false as Boolean,
+      changeablePost: null as Post | null | undefined,
+      posts: null as Post[] | null
     }
   },
   actions: {
@@ -25,8 +27,32 @@ export const mainStore = defineStore({
     setCategories(payload: Category[] | null){
       this.categories = payload;
     },
+    addCategory(payload: Category) {
+      this.categories?.push(payload);
+    },
     setCurrentCategory(payload: Category | null){
       this.currentCategory = payload;
+    },
+    setPosts(payload: Post[]) {
+      this.posts = payload;
+    },
+    setChangeablePost(payload: Post) {
+      this.changeablePost = payload
+    },
+    updatePost(payload: Post) {
+      if (this.posts) {
+        this.posts = this.posts.map((post) => {
+          if (post && post.id === payload.id) {
+            return { ...payload };
+          }
+          return post;
+        });
+      }
+    },
+    addPost(payload: Post) {
+      if(this.posts && payload) {
+        this.posts.unshift(payload);
+      }
     },
     login() {
       this.isLoggedIn = true;
@@ -55,6 +81,12 @@ export const mainStore = defineStore({
     getCurrentCategory(state) {
       return state.currentCategory;
     },
+    getPosts(state) {
+      return state.posts;
+    },
+    getChangeablePost(state) {
+      return state.changeablePost;
+    },
   },
 })
 
@@ -74,4 +106,14 @@ export interface Role {
 export interface Category {
   id: number;
   title: string;
+}
+
+export interface Post {
+  id: number,
+  title: string,
+  interaction_date: string,
+  description?: string,
+  rating: number,
+  count: number,
+  image?: string,
 }
