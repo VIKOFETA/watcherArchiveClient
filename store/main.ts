@@ -14,7 +14,8 @@ export const mainStore = defineStore({
       isLoggedIn: false as Boolean,
       isModalOpened: false as Boolean,
       changeablePost: null as Post | null | undefined,
-      posts: null as Post[] | null
+      posts: null as Post[] | null,
+      serverAddress: 'http://localhost:3301' as string,
     }
   },
   actions: {
@@ -65,6 +66,7 @@ export const mainStore = defineStore({
       this.setUser(null);
       this.setCategories(null);
       this.setCurrentCategory(null);
+      this.setPosts([]);
       this.logout();
     }
   },
@@ -89,31 +91,3 @@ export const mainStore = defineStore({
     },
   },
 })
-
-
-export interface User {
-  id: number
-  login: string,
-  role: Role,
-}
-
-export interface Role {
-  id: number,
-  name: string,
-}
-
-
-export interface Category {
-  id: number;
-  title: string;
-}
-
-export interface Post {
-  id: number,
-  title: string,
-  interaction_date: string,
-  description?: string,
-  rating: number,
-  count: number,
-  image?: string,
-}

@@ -36,10 +36,7 @@ export default {
  
     onMounted(() => {
       if(!store.isLoggedIn) {
-        console.log(store.token, 'no token');
         navigate('/authorization');
-      } else {
-        console.log(store.getToken, 'token exist');
       }
     });
 

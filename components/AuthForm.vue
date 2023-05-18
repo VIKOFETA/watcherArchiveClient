@@ -5,10 +5,23 @@
       <input  v-model="password" placeholder="Password" type="password" name="password" id="password" class="auth-form__input text-5">
       <button type="submit" class="auth-form__submit text-5">{{ buttonText }}</button>
     </div>
+    <div class="auth-form__note text-5" v-if="note">{{ note }}</div>
   </form>
 </template>
 
 <script lang="ts">
+
+interface loginResponse {
+  token: string,
+  user: User
+}
+
+interface registerResponse {
+  message: string,
+  user: User
+}
+
+
 import { mainStore } from '~/store/main'
 export default {
   props: {
@@ -22,6 +35,7 @@ export default {
     let login = ref('');
     let password = ref('');
     let buttonText = '';
+    let note = ref('');
 
     if(props.type === 'Login' ) {
       buttonText = 'Log In';
@@ -29,7 +43,7 @@ export default {
       buttonText = 'Registrate';
     }
 
-    const submitForm = (e: Event) => {
+    const submitForm = async (e: Event) => {
       e.preventDefault()
 
       const sendParams = {
@@ -37,13 +51,48 @@ export default {
         password: password.value,
         type: props.type,
       };
-      
-      if(sendParams.login && props.type === 'Login'){
-        console.log('navigate to index')
-        store.setToken(sendParams.login);
-        store.login();
-        navigateTo('/');
+
+      if(sendParams.login && sendParams.password) {
+        if(sendParams.type === 'Login' ) {
+          await useFetch('http://localhost:3301/auth/login', { 
+            method: 'POST', 
+            body: { login: sendParams.login, password: sendParams.password },
+            onResponse({ request, response, options }) {
+              const data: loginResponse = response._data as loginResponse;
+              if(data.token && data.user.id) {
+                store.setToken(data.token);
+                store.setUser(data.user);
+                store.login();
+                navigateTo('/');
+              }
+            },
+            onResponseError({ request, response, options }) {
+              note.value = response._data.message;
+              console.error('error', response)
+            }
+          });
+        } else if(sendParams.type === 'Registration' ) {
+          await useFetch('http://localhost:3301/auth/registration', { 
+            method: 'POST', 
+            body: { login: sendParams.login, password: sendParams.password },
+            onResponse({ request, response, options }) {
+              const data: registerResponse = response._data as registerResponse;
+              note.value = data.message;
+            },
+            onResponseError({ request, response, options }) {
+              note.value = response._data.message;
+              console.error('error', response)
+            } 
+          });
+        }
       }
+      
+      // if(sendParams.login && props.type === 'Login'){
+      //   console.log('navigate to index')
+      //   store.setToken(sendParams.login);
+      //   store.login();
+      //   navigateTo('/');
+      // }
     }
 
     return {
@@ -51,6 +100,7 @@ export default {
       buttonText,
       login,
       password,
+      note,
     }
   }
 }
@@ -84,5 +134,9 @@ export default {
 
       &:hover
         transform scale(.98)
+    
+    &__note
+      margin-top 3rem
+      color red
 
 </style>

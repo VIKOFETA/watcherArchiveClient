@@ -8,7 +8,7 @@
       </div>
       <div class="posts-list-item__content">
         <div class="posts-list-item__image-wrapper">
-          <img src="" alt="" class="posts-list-item__image" v-if="post?.image && post.image !== ''">
+          <img :src="src" alt="" class="posts-list-item__image" v-if="post?.image">
         </div>
         <div class="posts-list-item__info text-5">
           <div class="posts-list-item__description">{{ post?.description }}</div>
@@ -26,16 +26,6 @@
 <script lang="ts">
   import { mainStore } from '~/store/main'
 
-  interface Post {
-    id: number,
-    title: string,
-    interaction_date: string,
-    description?: string,
-    rating: number,
-    count: number,
-    image?: string,
-  }
-
   export default {
     props: {
       post: {
@@ -52,8 +42,13 @@
         }
       }
 
+      const src = computed(() => {
+        return store.serverAddress + '/' + (props.post?.image as string).replace(/\\/g,"/");
+      });
+
       return {
-        updatePost
+        updatePost,
+        src
       }
     }
   }
@@ -89,10 +84,21 @@
       margin-right 2rem
       width 200px
       height 200px
+      position relative
       // max-width 200px
       // height 0
       // padding-bottom 100%
       background gray
+    
+    &__image
+      width 100%
+      height 100%
+      position absolute
+      top 0
+      left 0
+      right 0
+      bottom 0
+      object-fit cover
     
     &__info
       flex 1 1

@@ -6,7 +6,7 @@
       <textarea placeholder="Description" name="description" id="description" v-model="description" rows="30" class="post-form__textarea text-5"></textarea>
       <div class="post-form__row">
         <label for="image" class="post-form__file-label button text-5">Poster Upload</label>
-        <input type="file" name="image" id="image" class="post-form__file text-5">
+        <input type="file" name="image" id="image" v-on:change="onFileChange" class="post-form__file text-5">
         <input  placeholder="Rating" type="number" name="rating" id="rating" v-model="rating" class="post-form__input text-5">
         <input  placeholder="Count" type="number" name="count" id="count" v-model="count" class="post-form__input text-5">
       </div>
@@ -28,7 +28,7 @@ export default {
     const description: Ref<string | number | string[] | undefined>  = ref('') ;
     const count: Ref<number | null | undefined>  = ref(0) ;
     const rating: Ref<number | null | undefined>  = ref(0) ;
-    const image: Ref<string | null | undefined>  = ref('') ;
+    let image: Ref<File | null | string >  = ref(null) ;
 
     const post = store.getChangeablePost;
     if(post){
@@ -42,48 +42,73 @@ export default {
       description.value = '';
       count.value = 0;
       rating.value = 0;
-      image.value = '';
+      image.value = null;
     }
 
-    // watch(
-    //   changeablePost, 
-    //   (newValue) => {
-    //     console.log(newValue);
-    //     title.value = newValue?.title;
-    //     description.value = newValue?.description;
-    //     count.value = newValue?.count;
-    //     rating.value = newValue?.rating;
-    //     image.value = newValue?.image;
-    //   }
-    // );
-
-    const submitForm = (e: Event) => {
+    const submitForm = async (e: Event) => {
       e.preventDefault()
       if(post) {
+        // change post
+        const formData =  new FormData();
+        formData.append('id', post.id.toString());
+        formData.append('title', title.value ? title.value : post.title);
+        formData.append('description', description.value as string);
+        formData.append('count', count.value ? count.value.toString() : post.count.toString());
+        formData.append('rating', rating.value? rating.value.toString() : post.rating.toString());
+        if(image.value) {
+          formData.append('file', image.value);
+        }
 
-        store.updatePost({ 
-          id: post.id,
-          title: title.value!,
-          description: description.value as string,
-          count: count.value!,
-          rating: rating.value!,
-          image: image.value!,
-          interaction_date: new Date().toLocaleString(),
-        })
-        store.changeablePost = null;
+        await useFetch('http://localhost:3301/api/v1/post', { 
+          method: 'PUT',
+          headers: {
+            authorization: `Bearer ${store.token}`,
+            contentType: 'multipart/form-data',
+          },
+          body: formData,
+          onResponse({ request, response, options }) {
+            // console.log(response)
+            if(response._data.post) {
+              store.updatePost(response._data.post)
+              store.changeablePost = null;
+              store.isModalOpened = false;
+            }
+          },
+          onResponseError({ request, response, options }) {
+            console.error('error', response._data.message, response)
+          }
+        });
 
       } else {
+        // add post
+        const formData =  new FormData();
+        formData.append('title', title.value ? title.value : 'New Post');
+        formData.append('description', description.value ? description.value as string : 'Empty');
+        formData.append('count', count.value ? count.value!.toString() : '1');
+        formData.append('rating', rating.value ? rating.value.toString() : '0');
+        formData.append('category', store.currentCategory!.id.toString());
+        if(image.value) {
+          formData.append('file', image.value);
+        }
 
-        store.addPost({ 
-          id: Math.floor(Math.random() * 10),
-          title: title.value!,
-          description: description.value as string,
-          count: count.value!,
-          rating: rating.value!,
-          image: image.value!,
-          interaction_date: new Date().toLocaleString(),
-        })
-        // console.log('Submit Post Form', {title: title.value, desc: description.value, count: count.value, rating: rating.value, image: image.value});
+        await useFetch('http://localhost:3301/api/v1/post', { 
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${store.token}`,
+            contentType: 'multipart/form-data',
+          },
+          body: formData,
+          onResponse({ request, response, options }) {
+            // console.log(response)
+            if(response._data.post) {
+              store.addPost(response._data.post)
+              store.isModalOpened = false;
+            }
+          },
+          onResponseError({ request, response, options }) {
+            console.error('error', response._data.message, response)
+          }
+        });
 
       }
   
@@ -91,9 +116,14 @@ export default {
       description.value = '';
       count.value = 0;
       rating.value = 0;
-      image.value = '';
+      image.value = null;
       store.isModalOpened = false
     }
+
+    const onFileChange = (e: Event) => {
+      const files = (e.target as HTMLInputElement).files;
+      image.value = files![0];
+    };
 
     return {
       submitForm,
@@ -103,7 +133,7 @@ export default {
       description,
       count,
       rating,
-      image,
+      onFileChange,
     }
   }
 }
