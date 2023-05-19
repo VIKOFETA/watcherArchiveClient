@@ -9,12 +9,14 @@ export const mainStore = defineStore({
     return {
       token: '' as String,
       user: null as User | null,
-      categories: null as Category[] | null,
+      categories: [] as Category[] | null,
       currentCategory: null as Category | null,
       isLoggedIn: false as Boolean,
       isModalOpened: false as Boolean,
+      isPostFormModal: false as Boolean,
+      isCategoryFormModal: false as Boolean,
       changeablePost: null as Post | null | undefined,
-      posts: null as Post[] | null,
+      posts: [] as Post[] | null,
       serverAddress: 'http://localhost:3301' as string,
     }
   },
@@ -30,12 +32,21 @@ export const mainStore = defineStore({
     },
     addCategory(payload: Category) {
       this.categories?.push(payload);
+      if(this.categories?.length === 1) {
+        this.currentCategory = this.categories[0];
+      }
     },
     setCurrentCategory(payload: Category | null){
       this.currentCategory = payload;
     },
     setPosts(payload: Post[]) {
       this.posts = payload;
+    },
+    deletePost(payload: Post) {
+      var index = this.posts?.indexOf(payload);
+      if (index !== -1) {
+        this.posts?.splice(index as number, 1);
+      }
     },
     setChangeablePost(payload: Post) {
       this.changeablePost = payload

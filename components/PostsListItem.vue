@@ -4,7 +4,7 @@
       <div class="posts-list-item__header">
         <!-- <span class="posts-list-item__index heading-4">{{ post?.id }}.</span> -->
         <div class="posts-list-item__title heading-4">{{ post?.title }}</div>
-        <div class="posts-list-item__date text-5">{{ post?.interaction_date }}</div>
+        <div class="posts-list-item__date text-5">{{ new Date(post?.interaction_date as string).toLocaleString() }}</div>
       </div>
       <div class="posts-list-item__content">
         <div class="posts-list-item__image-wrapper">
@@ -16,6 +16,7 @@
             <span class="posts-list-item__info-rating">{{ post?.rating }}/10 </span>
             <div class="posts-list-item__count">Watch Count: {{ post?.count }}</div>
             <button @click="updatePost" class="posts-list-item__change button text-5">Update</button>
+            <button @click="deletePost" class="posts-list-item__delete button text-5">X</button>
           </div>
         </div>
       </div>
@@ -39,7 +40,24 @@
         if(!store.isModalOpened) {
           store.setChangeablePost(props.post!);
           store.isModalOpened = true;
+          store.isPostFormModal = true;
         }
+      }
+      const deletePost = async () => {
+        await useFetch(`http://localhost:3301/api/v1/post/${props.post?.id}`, { 
+          method: 'DELETE',
+          headers: {
+            authorization: `Bearer ${store.token}`
+          },
+          onResponse({ request, response, options }) {
+            if(response._data) {
+              store.deletePost(props.post as Post)
+            }
+          },
+          onResponseError({ request, response, options }) {
+            console.error('error', response._data)
+          }
+        });
       }
 
       const src = computed(() => {
@@ -48,6 +66,7 @@
 
       return {
         updatePost,
+        deletePost,
         src
       }
     }
@@ -118,5 +137,9 @@
     
     &__change
       margin-left auto
+
+    &__delete
+      margin-left 2rem
+      background #bd2130
 
 </style>

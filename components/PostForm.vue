@@ -72,6 +72,7 @@ export default {
               store.updatePost(response._data.post)
               store.changeablePost = null;
               store.isModalOpened = false;
+              store.isPostFormModal = false;
             }
           },
           onResponseError({ request, response, options }) {
@@ -103,6 +104,7 @@ export default {
             if(response._data.post) {
               store.addPost(response._data.post)
               store.isModalOpened = false;
+              store.isPostFormModal = false;
             }
           },
           onResponseError({ request, response, options }) {

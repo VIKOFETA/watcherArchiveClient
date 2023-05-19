@@ -17,6 +17,8 @@ export default defineComponent({
 
     const close = () => {
       store.isModalOpened = false;
+      store.isCategoryFormModal = false;
+      store.isPostFormModal = false;
     }
 
     return {

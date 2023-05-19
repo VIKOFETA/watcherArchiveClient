@@ -20,7 +20,7 @@
         type: Number,
       }
     },
-    setup(props, ctx) {       
+    setup(props, ctx) {
       const store = mainStore();
       const { posts, currentCategory } = storeToRefs(store);
 
@@ -37,7 +37,6 @@
       }
 
       const getPosts = async () => {
-        console.log('new cat', currentCategory.value);
         await useFetch('http://localhost:3301/api/v1/post/', { 
           method: 'GET',
           headers: {
@@ -47,7 +46,6 @@
             category_id: currentCategory.value?.id
           },
           onResponse({ request, response, options }) {
-            console.log(response._data);
             if(response._data.posts.length > 0) {
               store.setPosts(response._data.posts);
             } else {

@@ -5,7 +5,7 @@
         <h2 class="auth__title heading-3">Welcome to Wathcer Archive</h2>
         <transition @enter="onEnter" @leave="onLeave" mode="out-in" >
           <AuthForm class="auth__form" :type="'Login'" :key="'login'" v-if="formLogin" />
-          <AuthForm class="auth__form" :type="'Registration'" :key="'registration'" v-else-if="!formLogin" />
+          <AuthForm class="auth__form" :type="'Registration'" @registrationSuccess="registerSuccess" :key="'registration'" v-else-if="!formLogin" />
         </transition>
         <button class="auth__new-user text-6" @click.prevent="formLogin = !formLogin">
           <transition mode="out-in" name="fade" :duration="{ enter: 1000, leave: 1000 }">
@@ -46,10 +46,16 @@ export default {
         onComplete: done
       });
     };
+    const registerSuccess = () => {
+      setTimeout(() => {
+        formLogin.value = !formLogin.value
+      }, 1000)
+    }
     return {
       formLogin,
       onEnter,
       onLeave,
+      registerSuccess
     };
   },
 }

@@ -1,10 +1,11 @@
 <template>
   <div class="category-list">
     <ul class="category-list__list">
-      <li class="category-list__item text-3" :class="{'active': currentCategoryId === item.id}" :data-category-id="item.id" v-for="item in items" :key="item.id">
+      <li class="category-list__item text-3" :class="{'active': currentCategoryId === item.id}" :data-category-id="item.id" v-for="item in categories" :key="item.id">
         <button @click="categorySelection(item)" class="category-list__button"> {{ item.name }} </button>
       </li>
     </ul>
+    <button @click="addCategory" class="category-list__add button text-5">+</button>
   </div>
 </template>
 
@@ -15,9 +16,17 @@
   export default {
     setup(props, ctx) {
       const store = mainStore();
-      const items: Ref<Category[]> = ref([]);
       const currentCategoryId: Ref<number | undefined> = ref(store.getCurrentCategory?.id)
-      const { currentCategory } = storeToRefs(store);
+      const { currentCategory, categories } = storeToRefs(store);
+    
+      watch(
+        currentCategory,
+        async (newValue) => {
+          if(newValue) {
+            currentCategoryId.value = newValue.id;
+          }
+        }
+      );
 
       const loadCategoriesOfUser = async () => {
         const response = await useFetch('http://localhost:3301/api/v1/category', { 
@@ -28,9 +37,10 @@
           onResponse({ request, response, options }) {
             // console.log(response)
             if(response._data.categories.length > 0) {
-              items.value = response._data.categories;
-              store.setCategories(items.value);
-              store.setCurrentCategory(items.value[0]);
+              store.setCategories(response._data.categories);
+              if(store.getCategories){
+                store.setCurrentCategory(store.getCategories[0]);
+              }
             }
           },
           onResponseError({ request, response, options }) {
@@ -44,40 +54,6 @@
         loadCategoriesOfUser();
       }
 
-      watch(
-        currentCategory,
-        async (newValue) => {
-          if(newValue) {
-            currentCategoryId.value = newValue.id;
-          }
-        }
-      );
-      // items.value = [
-      //   {
-      //     id: 1,
-      //     title: 'Category 1',
-      //   },
-      //   {
-      //     id: 2,
-      //     title: 'Category 2',
-      //   },
-      //   {
-      //     id: 3,
-      //     title: 'Category 3',
-      //   },
-      //   {
-      //     id: 4,
-      //     title: 'Category 4',
-      //   },
-      //   {
-      //     id: 5,
-      //     title: 'Category 5',
-      //   },
-      // ];
-      // store.setCategories(items.value);
-      // store.setCurrentCategory(items.value[0]);
-
-
       const categorySelection = (item: Category) => {
         if(store.getCurrentCategory?.id !== item.id){
           ctx.emit('newSelectedCategory', item);
@@ -87,10 +63,16 @@
         }
       }
 
+      const addCategory = async () => {
+        store.isModalOpened = true;
+        store.isCategoryFormModal = true;
+      }
+
       return {
-        items,
+        categories,
         categorySelection,
         currentCategoryId,
+        addCategory,
       }
     }
   }
@@ -101,7 +83,6 @@
 
   .category-list
     display flex
-    flex-direction column
     justify-content center
 
     &__list
@@ -120,5 +101,9 @@
       transition transform .3s
       &:hover
         transform scale(0.98)
+    
+    &__add
+      margin-left 2rem
+      font-weight bold
 
 </style>

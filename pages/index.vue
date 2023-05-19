@@ -21,8 +21,9 @@ export default {
     const count = ref(1);
 
     const newPost = () => {
-      if(!store.isModalOpened) {
+      if(currentCategory && !store.isModalOpened) {
         store.isModalOpened = true;
+        store.isPostFormModal = true;
       }
     };
 

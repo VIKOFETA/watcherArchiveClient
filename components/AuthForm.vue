@@ -30,7 +30,7 @@ export default {
       default: 'Login'
     }
   },
-  setup(props) {      
+  setup(props, ctx) {      
     const store = mainStore();
     let login = ref('');
     let password = ref('');
@@ -76,8 +76,11 @@ export default {
             method: 'POST', 
             body: { login: sendParams.login, password: sendParams.password },
             onResponse({ request, response, options }) {
-              const data: registerResponse = response._data as registerResponse;
-              note.value = data.message;
+              console.log(response._data)
+              note.value = response._data.message as string;
+              if(response._data.user.id) {
+                ctx.emit('registrationSuccess');
+              }
             },
             onResponseError({ request, response, options }) {
               note.value = response._data.message;

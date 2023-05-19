@@ -6,7 +6,8 @@
     <Teleport to="body">
       <Transition name="modal" @enter="onEnter" @leave="onLeave">
         <Modal v-if="isModalOpened" :key="'modal'">
-          <PostForm />
+          <PostForm v-if="isPostFormModal" />
+          <CategoryForm v-if="isCategoryFormModal" />
         </Modal>
       </Transition>
     </Teleport>
@@ -20,14 +21,7 @@ import gsap from "gsap";
 export default defineComponent({
   setup () {
     const store = mainStore();
-    const {isLoggedIn, isModalOpened} = storeToRefs(store);
-
-    // watch(
-    //   isLoggedIn,
-    //   (newValue) => {
-    //     console.log('new cat', newValue);
-    //   }
-    // );
+    const {isLoggedIn, isModalOpened, isPostFormModal, isCategoryFormModal} = storeToRefs(store);
 
     const exitEvent = () => {
       store.exit()
@@ -63,6 +57,8 @@ export default defineComponent({
       exitEvent,
       isLoggedIn,
       isModalOpened,
+      isPostFormModal,
+      isCategoryFormModal,
       onEnter,
       onLeave
     }
