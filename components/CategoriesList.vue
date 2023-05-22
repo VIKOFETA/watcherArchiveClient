@@ -1,11 +1,12 @@
 <template>
   <div class="category-list">
     <ul class="category-list__list">
-      <li class="category-list__item text-3" :class="{'active': currentCategoryId === item.id}" :data-category-id="item.id" v-for="item in categories" :key="item.id">
-        <button @click="categorySelection(item)" class="category-list__button"> {{ item.name }} </button>
+      <li class="category-list__item text-3" :data-category-id="item.id" v-for="item in categories" :key="item.id">
+        <button @click="categorySelection(item)" class="category-list__item-title" :class="{'active': currentCategoryId === item.id}"> {{ item.name }} </button>
+        <button @click="updateCategory(item)" class="category-list__edit"> <Icon name="material-symbols:settings-rounded" class="category-list__item-icon"/> </button>
       </li>
     </ul>
-    <button @click="addCategory" class="category-list__add button text-5">+</button>
+    <button @click="addCategory" class="category-list__add text-3"><Icon name="material-symbols:add-box-outline" color="#84ceff" /></button>
   </div>
 </template>
 
@@ -67,12 +68,20 @@
         store.isModalOpened = true;
         store.isCategoryFormModal = true;
       }
+      const updateCategory = (category: Category) => {
+        if(!store.isModalOpened) {
+          store.setChangeableCategory(category);
+          store.isModalOpened = true;
+          store.isCategoryFormModal = true;
+        }
+      }
 
       return {
         categories,
         categorySelection,
         currentCategoryId,
         addCategory,
+        updateCategory,
       }
     }
   }
@@ -94,16 +103,19 @@
       &:not(:last-child)
         margin-right 1.5rem
       
+      
+    &__item-title
+      transition transform .3s
       &.active
         border-bottom 2px solid #84ceff
-      
-    &__button
-      transition transform .3s
       &:hover
         transform scale(0.98)
     
     &__add
       margin-left 2rem
-      font-weight bold
+    
+    &__item-icon
+      margin-left 0.5rem
+      font-size 22px
 
 </style>

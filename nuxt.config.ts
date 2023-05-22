@@ -15,6 +15,7 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@pinia-plugin-persistedstate/nuxt',
+    'nuxt-icon',
     ['@nuxtjs/google-fonts', {
       families: {
         'Open Sans': true,

@@ -1,46 +1,94 @@
 <template>
-  <form @submit="submitForm" class="post-form">
-    <h4 class="post-form__title heading-5">Category</h4>
-    <div class="post-form__wrapper">
-      <input  placeholder="Title" type="text" name="title" id="title" v-model="title"  class="post-form__input text-5">
-      <button type="submit" class="post-form__submit button text-5">{{ buttonText }}</button>
-    </div>
-  </form>
+  <div class="category-form__container">
+    <form @submit="submitForm" class="category-form">
+      <h4 class="category-form__title heading-5">Category</h4>
+      <div class="category-form__wrapper">
+        <input  placeholder="Title" type="text" name="title" id="title" v-model="name"  class="category-form__input text-5">
+        <div class="category-form__bottom">
+          <button type="submit" class="category-form__submit button text-5">{{ buttonText }}</button>
+        </div>
+      </div>
+    </form>
+    <button @click="deleteCategory" class="category-form__delete button text-5">Delete</button>
+  </div>
 </template>
 
 <script lang="ts">
 import { mainStore } from '~/store/main'
-import { storeToRefs } from 'pinia'
 export default {
   setup(props) { 
     const store = mainStore();
-    // const {changeablePost} = storeToRefs(store);
     let buttonText = 'Submit';
 
-    const title: Ref<string | null | undefined>  = ref('') ;
+    const name: Ref<string | null | undefined>  = ref('') ;
 
-    // const post = store.getChangeablePost;
-    // if(post){
-    //   title.value = post?.title;
-    // } else {
-    //   title.value = '';
-    // }
+    if(store.getChangeableCategory){
+      name.value = store.getChangeableCategory?.name;
+    } else {
+      name.value = '';
+    }
 
     const submitForm = async (e: Event) => {
-      e.preventDefault()
-      await useFetch('http://localhost:3301/api/v1/category', { 
-        method: 'POST',
+      e.preventDefault();
+      if(store.getChangeableCategory) {
+        await useFetch('http://localhost:3301/api/v1/category', { 
+          method: 'PUT',
+          headers: {
+            authorization: `Bearer ${store.token}`,
+            contentType: 'multipart/form-data',
+          },
+          body: {
+            id: store.getChangeableCategory.id.toString(),
+            name: name.value?.toString()
+          },
+          onResponse({ request, response, options }) {
+            if(response._data.category) {
+              store.updateCategory(response._data.category)
+              store.changeableCategory = null;
+              store.isModalOpened = false;
+              store.isCategoryFormModal = false;
+            }
+          },
+          onResponseError({ request, response, options }) {
+            console.error('error', response._data.message, response)
+          }
+        });
+      } else {
+        await useFetch('http://localhost:3301/api/v1/category', { 
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${store.token}`,
+            contentType: 'multipart/form-data',
+          },
+          body: {
+            name: name.value?.toString()
+          },
+          onResponse({ request, response, options }) {
+            if(response._data.category) {
+              store.addCategory(response._data.category)
+              store.isModalOpened = false;
+              store.isCategoryFormModal = false;
+            }
+          },
+          onResponseError({ request, response, options }) {
+            console.error('error', response._data.message, response)
+          }
+        });
+      }
+      name.value = '';
+    }
+    const deleteCategory = async (e: Event) => {
+      e.preventDefault();
+      await useFetch(`http://localhost:3301/api/v1/category/${store.getChangeableCategory?.id}`, { 
+        method: 'DELETE',
         headers: {
           authorization: `Bearer ${store.token}`,
           contentType: 'multipart/form-data',
         },
-        body: {
-          name: title.value?.toString()
-        },
         onResponse({ request, response, options }) {
-          // console.log(response)
-          if(response._data.category) {
-            store.addCategory(response._data.category)
+          if(response._data.response) {
+            console.log(response._data);
+            store.deleteCategory(store.getChangeableCategory!)
             store.isModalOpened = false;
             store.isCategoryFormModal = false;
           }
@@ -48,22 +96,27 @@ export default {
         onResponseError({ request, response, options }) {
           console.error('error', response._data.message, response)
         }
-      });  
-      title.value = '';
-    }
+      });
+    };
+
     return {
       submitForm,
+      deleteCategory,
       buttonText,
-      title,
+      name,
     }
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-  .post-form
+  .category-form
     display flex
     flex-direction column
+
+    &__container
+      display flex
+      flex-direction column
 
     &__title
       margin-bottom 5rem
@@ -105,11 +158,21 @@ export default {
     
     &__file-label
       margin-right auto
+    
+    &__bottom
+      margin-top 3rem
+      display flex
+      justify-content center
+      align-items center
+      position relative
 
     &__submit
-      margin-top 3rem
 
       &:hover
         transform scale(.98)
+    
+    &__delete
+      align-self flex-end
+      background #bd2130
 
 </style>

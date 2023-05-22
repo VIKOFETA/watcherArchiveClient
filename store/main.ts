@@ -15,7 +15,8 @@ export const mainStore = defineStore({
       isModalOpened: false as Boolean,
       isPostFormModal: false as Boolean,
       isCategoryFormModal: false as Boolean,
-      changeablePost: null as Post | null | undefined,
+      changeablePost: null as Post | null,
+      changeableCategory: null as Category | null,
       posts: [] as Post[] | null,
       serverAddress: 'http://localhost:3301' as string,
     }
@@ -39,6 +40,25 @@ export const mainStore = defineStore({
     setCurrentCategory(payload: Category | null){
       this.currentCategory = payload;
     },
+    updateCategory(payload: Category) {
+      if (this.categories) {
+        this.categories = this.categories.map((category) => {
+          if (category && category.id === payload.id) {
+            return { ...payload };
+          }
+          return category;
+        });
+      }
+    },
+    deleteCategory(payload: Category) {
+      var index = this.categories?.indexOf(payload);
+      if (index !== -1) {
+        this.categories?.splice(index as number, 1);
+      }
+      this.posts = [];
+      this.currentCategory = null;
+      this.changeableCategory = null;
+    },
     setPosts(payload: Post[]) {
       this.posts = payload;
     },
@@ -50,6 +70,9 @@ export const mainStore = defineStore({
     },
     setChangeablePost(payload: Post) {
       this.changeablePost = payload
+    },
+    setChangeableCategory(payload: Category) {
+      this.changeableCategory = payload
     },
     updatePost(payload: Post) {
       if (this.posts) {
@@ -75,7 +98,7 @@ export const mainStore = defineStore({
     exit() {
       this.setToken('');
       this.setUser(null);
-      this.setCategories(null);
+      this.setCategories([]);
       this.setCurrentCategory(null);
       this.setPosts([]);
       this.logout();
@@ -99,6 +122,9 @@ export const mainStore = defineStore({
     },
     getChangeablePost(state) {
       return state.changeablePost;
+    },
+    getChangeableCategory(state) {
+      return state.changeableCategory;
     },
   },
 })
